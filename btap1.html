@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Đăng Ký Xác Minh</title>
+  <link rel="stylesheet" href="btap1.css">
+
+</head>
+<body>
+
+  <div class="container">
+    <h2>Form Đăng Ký</h2>
+    
+    <form id="registerForm" novalidate>
+      <label for="email">Email:</label>
+      <input type="text" id="email" />
+      <div id="emailError" class="error"></div>
+      
+      <label for="password">Mật khẩu:</label>
+      <input type="password" id="password" />
+      <div id="passwordError" class="error"></div>
+      
+      <label>
+        <input type="checkbox" id="terms" />
+        Tôi đồng ý với điều khoản
+      </label>
+      <div id="termsError" class="error"></div>
+      
+      <button type="submit">Đăng ký</button>
+      
+      <div id="successMessage" class="success"></div>
+    </form>
+  </div>
+
+  <script>
+    function validateEmail(email) {
+      if (email.indexOf(' ') !== -1) {
+        return 'Email không được chứa khoảng trắng.';
+      }
+
+      if (email.indexOf('@') === -1 || email.indexOf('.') === -1) {
+        return 'Email phải chứa ký tự "@" và "."';
+      }
+
+      var firstChar = email.charAt(0);
+      var lastChar = email.charAt(email.length - 1);
+      if (firstChar === '@' || firstChar === '.' || lastChar === '@' || lastChar === '.') {
+        return 'Email không được bắt đầu hoặc kết thúc bằng "@" hoặc "."';
+      }
+
+      return '';
+    }
+
+    function validatePassword(password) {
+      if (password.length < 6 || password.length > 12) {
+        return 'Mật khẩu phải từ 6 đến 12 ký tự.';
+      }
+      return '';
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', function(event) {
+      event.preventDefault(); 
+      var email = document.getElementById('email').value.trim();
+      var password = document.getElementById('password').value;
+      var termsChecked = document.getElementById('terms').checked;
+
+      document.getElementById('emailError').textContent = '';
+      document.getElementById('passwordError').textContent = '';
+      document.getElementById('termsError').textContent = '';
+      document.getElementById('successMessage').textContent = '';
+
+      var hasError = false;
+
+      var emailError = validateEmail(email);
+      if (emailError !== '') {
+        document.getElementById('emailError').textContent = emailError;
+        hasError = true;
+      }
+
+      var passwordError = validatePassword(password);
+      if (passwordError !== '') {
+        document.getElementById('passwordError').textContent = passwordError;
+        hasError = true;
+      }
+
+      if (!termsChecked) {
+        document.getElementById('termsError').textContent = 'Bạn phải đồng ý với điều khoản.';
+        hasError = true;
+      }
+
+      if (!hasError) {
+        document.getElementById('successMessage').textContent = 'Đăng ký thành công!';
+      }
+    });
+  </script>
+
+</body>
+</html>

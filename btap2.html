@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản Lý Sản Phẩm - CRUD</title>
+  <link rel="stylesheet" href="btap2.css">
+</head>
+<body>
+
+<div class="container">
+  <h2>Quản Lý Sản Phẩm</h2>
+  <form id="productForm">
+    <div>
+      <label for="productName">Tên sản phẩm *</label>
+      <input type="text" id="productName">
+      <div class="error" id="nameError"></div>
+    </div>
+
+    <div>
+      <label for="productPrice">Giá sản phẩm *</label>
+      <input type="number" id="productPrice" min="0">
+      <div class="error" id="priceError"></div>
+    </div>
+
+    <div>
+      <label for="productQuantity">Số lượng *</label>
+      <input type="number" id="productQuantity" min="0">
+      <div class="error" id="quantityError"></div>
+    </div>
+
+    <div>
+      <label for="productDescription">Mô tả sản phẩm</label>
+      <textarea id="productDescription"></textarea>
+    </div>
+
+    <div class="actions">
+      <button type="submit" id="submitBtn">Thêm sản phẩm</button>
+    </div>
+  </form>
+
+  <table id="productTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Tên sản phẩm</th>
+        <th>Giá</th>
+        <th>Số lượng</th>
+        <th>Mô tả</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  let products = JSON.parse(localStorage.getItem('products')) || [];
+  let isEdit = false;
+  let editIndex = null;
+
+  window.onload = function() {
+    renderTable();
+  }
+
+  document.getElementById('productForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('productName').value.trim();
+    const price = document.getElementById('productPrice').value.trim();
+    const quantity = document.getElementById('productQuantity').value.trim();
+    const description = document.getElementById('productDescription').value.trim();
+
+    document.getElementById('nameError').textContent = '';
+    document.getElementById('priceError').textContent = '';
+    document.getElementById('quantityError').textContent = '';
+
+    let valid = true;
+
+    if (name === '' || name.length > 50) {
+      document.getElementById('nameError').textContent = 'Tên sản phẩm không được để trống và tối đa 50 ký tự.';
+      valid = false;
+    }
+
+    if (price === '' || isNaN(price) || parseFloat(price) <= 0) {
+      document.getElementById('priceError').textContent = 'Giá sản phẩm phải là số dương.';
+      valid = false;
+    }
+
+    if (quantity === '' || isNaN(quantity) || parseInt(quantity) <= 0 || !Number.isInteger(parseFloat(quantity))) {
+      document.getElementById('quantityError').textContent = 'Số lượng phải là số nguyên dương.';
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    const product = {
+      name,
+      price: parseFloat(price),
+      quantity: parseInt(quantity),
+      description
+    };
+
+    if (isEdit) {
+      products[editIndex] = product;
+      isEdit = false;
+      editIndex = null;
+      document.getElementById('submitBtn').textContent = 'Thêm sản phẩm';
+    } else {
+      products.push(product);
+    }
+
+    localStorage.setItem('products', JSON.stringify(products));
+
+    document.getElementById('productForm').reset();
+
+    renderTable();
+  });
+
+  function renderTable() {
+    const tbody = document.querySelector('#productTable tbody');
+    tbody.innerHTML = '';
+
+    products.forEach((product, index) => {
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${product.name}</td>
+        <td>${product.price.toLocaleString('vi-VN')} đ</td>
+        <td>${product.quantity}</td>
+        <td>${product.description || ''}</td>
+        <td>
+          <button onclick="editProduct(${index})" style="background-color:#ffc107;">Sửa</button>
+          <button onclick="deleteProduct(${index})" style="background-color:#dc3545;">Xóa</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function deleteProduct(index) {
+    if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+      products.splice(index, 1);
+      localStorage.setItem('products', JSON.stringify(products));
+      renderTable();
+    }
+  }
+
+  function editProduct(index) {
+    const product = products[index];
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productPrice').value = product.price;
+    document.getElementById('productQuantity').value = product.quantity;
+    document.getElementById('productDescription').value = product.description;
+
+    isEdit = true;
+    editIndex = index;
+
+    document.getElementById('submitBtn').textContent = 'Cập nhật sản phẩm';
+  }
+</script>
+
+</body>
+</html>
